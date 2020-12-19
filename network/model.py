@@ -102,15 +102,25 @@ class Yolov1(nn.Module):
                 # i.e. repeated block
                 *sub_blocks, n = layer
                 for i in range(n):
-                    for j, (k, c, s, p) in enumerate(sub_blocks):
-                        #if j > 0:   # if not the first sub-block
-                            # update c_in for the current sub-block from the last sub-block
-                            #in_channels = sub_blocks[j-1][1]
+                    for (k, c, s, p) in sub_blocks:
                         layers.append(ConvBlock(in_channels, k, c, s, p))
-                        in_channels = c
+                        in_channels = c     # update next c_in = last c_out
         return nn.Sequential(*layers)
 
     def _build_fcls(self, grid_size, num_boxes, num_classes):
+        """
+        Building the fully connected output layers
+
+        Params
+        ------
+        grid_size: (int)
+            number of grid cells per axe of the input image
+        num_boxes: (int)
+            number of anchor boxes per grid cell
+        num_classes: (int)
+            number of classes in the dataset
+        
+        """
         S, B, C = grid_size, num_boxes, num_classes
         output_layers = [
             nn.Flatten(), 
