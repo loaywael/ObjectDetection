@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from utils import intersection_over_union
+from network.utils import intersection_over_union
 
 
 # YOLOv1 Network Architecture
@@ -148,8 +148,8 @@ class YoloLoss(nn.Module):
         # scoring anchor boxes
         for i in range(self.B):
             start_id = self.C+1 + i*4
-            stop_id = start_id + (i+1)*4]
-            iou_score = intersection_over_union(predictions[..., start_id:stop_id)
+            stop_id = start_id + (i+1)*4
+            iou_score = intersection_over_union(predictions[..., start_id:stop_id])
             iou_scores.append(iou_score.unsqueeze(dim=0))
         # filtering predicted anchor boxes
         iou_scores = torch.cat(iou_scores, dim=0)
@@ -157,7 +157,7 @@ class YoloLoss(nn.Module):
         objness = target[..., self.C].unsqueeze(3)
         # indexing box confidence, location
         start_id = self.C+1 + bestbox_arg*4
-        stop_id = start_id + (bestbox_arg+1)*4]
+        stop_id = start_id + (bestbox_arg+1)*4
         # gndtruth_box shape: (N, S, S, 4), where 4: x, y, w, h
         gndtruth_box = objness * target[..., self.C+1:] 
         gndtruth_box[..., 2:4] = torch.sqrt(gndtruth_box[..., 2:4])
@@ -191,8 +191,4 @@ class YoloLoss(nn.Module):
             torch.flatten(objness * predictions[..., :self.C], end_dim=-2)
         )
         loss = (self.coord * box_loc_loss) + objness_loss
-<<<<<<< HEAD:2D_ObjectDetectors/yolov1/network/model.py
         loss +=  (self.p_noobj * no_objness_loss) + class_loss
-=======
-        loss +=  (self.coord * no_objness_loss) + class_loss
->>>>>>> b8eafcfb8009e1c28804fc5fd0c1c2daf793301d:network/model.py

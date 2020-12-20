@@ -1,7 +1,7 @@
 from unittest import TestCase
 import numpy as np
 import torch
-from model import Yolov1
+from network.model import Yolov1
 
 
 class TestModel(TestCase):
