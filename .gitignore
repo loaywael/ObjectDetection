@@ -8,6 +8,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+2D_ObjectDetectors/yolov1/data/
 build/
 develop-eggs/
 dist/
