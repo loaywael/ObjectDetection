@@ -191,4 +191,8 @@ class YoloLoss(nn.Module):
             torch.flatten(objness * predictions[..., :self.C], end_dim=-2)
         )
         loss = (self.coord * box_loc_loss) + objness_loss
+<<<<<<< HEAD:2D_ObjectDetectors/yolov1/network/model.py
         loss +=  (self.p_noobj * no_objness_loss) + class_loss
+=======
+        loss +=  (self.coord * no_objness_loss) + class_loss
+>>>>>>> b8eafcfb8009e1c28804fc5fd0c1c2daf793301d:network/model.py
