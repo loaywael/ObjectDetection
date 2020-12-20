@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from utils import intersection_over_union
 
 
 # YOLOv1 Network Architecture
@@ -47,7 +48,6 @@ class ConvBlock(nn.Module):
             padding of feature maps
 
         """
-
         super(ConvBlock, self).__init__()
         kwargs["in_channels"] = c_in
         kwargs["kernel_size"] = k
@@ -99,7 +99,7 @@ class Yolov1(nn.Module):
             elif type(layer) == str:
                 layers.append(nn.MaxPool2d(kernel_size=(2, 2), stride=2))
             elif type(layer) == list:
-                # i.e. repeated block
+                # i.e. repeated blocks group
                 *sub_blocks, n = layer
                 for i in range(n):
                     for (k, c, s, p) in sub_blocks:
@@ -132,4 +132,63 @@ class Yolov1(nn.Module):
         return nn.Sequential(*output_layers)
 
     
-  
+class YoloLoss(nn.Module):
+    def __init__(self, S, B, C):
+        super(YoloLoss, self).__init__()
+        self.mse = nn.MSELoss(reduction="sum")
+        self.S = S
+        self.B = B
+        self.C = C
+        self.p_noobj = 0.5
+        self.coord = 5.0
+
+    def forward(self, predictions, target):
+        predictions = predictions.reshape(-1, self.S, self.S, self.C + self.B*5)
+        iou_scores = []
+        # scoring anchor boxes
+        for i in range(self.B):
+            start_id = self.C+1 + i*4
+            stop_id = start_id + (i+1)*4]
+            iou_score = intersection_over_union(predictions[..., start_id:stop_id)
+            iou_scores.append(iou_score.unsqueeze(dim=0))
+        # filtering predicted anchor boxes
+        iou_scores = torch.cat(iou_scores, dim=0)
+        iou_max, bestbox_arg = torch.max(iou_scores, dim=0)
+        objness = target[..., self.C].unsqueeze(3)
+        # indexing box confidence, location
+        start_id = self.C+1 + bestbox_arg*4
+        stop_id = start_id + (bestbox_arg+1)*4]
+        # gndtruth_box shape: (N, S, S, 4), where 4: x, y, w, h
+        gndtruth_box = objness * target[..., self.C+1:] 
+        gndtruth_box[..., 2:4] = torch.sqrt(gndtruth_box[..., 2:4])
+        # p_anchor_box shape: (N, S, S, 4), where 4: x, y, w, h
+        p_anchor_box = objness* predictions[..., start_id:stop_id]
+        # prevent grads of being zero or box dims being negative value
+        p_anchor_box[..., 2:4] = torch.sqrt(torch.abs(p_anchor_box[..., 2:4]+1e-6))
+        p_anchor_box_sign = torch.sign(p_anchor_box[..., 2:4])
+        p_anchor_box = p_anchor_box * p_anchor_box_sign
+        # -------------- Box Coordinates Loss --------------
+        # out should be flattened shape (N*S*S, 4)
+        box_loc_loss = self.mse(
+            torch.flatten(gndtruth_box, end_dim=-2),
+            torch.flatten(p_anchor_box, end_dim=-2)
+        )
+        # --------------    Object Loss    --------------
+        # flattned shape would be (N*S*S)
+        objness_loss = self.mse(
+            torch.flatten(objness * target[..., self.C]),
+            torch.flatten(objness * predictions[..., start_id-1])
+        )
+        # --------------    No Object Loss    --------------
+        no_objness_loss = self.mse(
+            torch.flatten((1-objness) * target[..., self.C]),
+            torch.flatten((1-objness) * predictions[..., start_id-1])
+        )
+        # --------------    Class Loss    --------------
+        # (N, S, S, 20) --> (N*S*S, 20)
+        class_loss = self.mse(
+            torch.flatten(objness * target[..., :self.C], end_dim=-2),
+            torch.flatten(objness * predictions[..., :self.C], end_dim=-2)
+        )
+        loss = (self.coord * box_loc_loss) + objness_loss
+        loss +=  (self.coord * no_objness_loss) + class_loss
