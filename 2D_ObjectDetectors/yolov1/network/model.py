@@ -159,62 +159,66 @@ class YoloLoss(nn.Module):
         -------
         """
         # reshaping predicted matrix from (N, S*S*(C+5*B)) --> (N, S, S, C+5*B)
+        # # scoring anchor boxes
         predection_matrix = predection_matrix.reshape((-1, self.S, self.S, self.C + self.B*5))
-        iou_scores = []
-        # scoring anchor boxes
-        start_id = self.C + 1
-        for i in range(self.B):
-            stop_id = start_id + 4
-            iou_score = eval_iou(
-                predection_matrix[..., start_id:stop_id], 
-                target_matrix[..., self.C+1:self.C+5]
-            )
-            start_id = stop_id + 1
-            iou_scores.append(iou_score.unsqueeze(dim=0))
-        # iou_score = eval_iou(
-        #         predection_matrix[..., self.C], 
-        #         target_matrix[..., self.C+1:self.C+5]
-        # )
+        iou_b1 = eval_iou(predection_matrix[..., 21:25], target_matrix[..., 21:25])
+        iou_b2 = eval_iou(predection_matrix[..., 26:30], target_matrix[..., 21:25])
+        iou_scores = torch.cat([iou_b1.unsqueeze(0), iou_b2.unsqueeze(0)], dim=0)
         # filtering predicted anchor boxes
-        iou_scores = torch.cat(iou_scores, dim=0)
-        print(">>> ", iou_scores.shape)
-        iou_max, bestbox_arg = torch.max(iou_scores, dim=0)
+        print("ious shape >>> ", iou_scores.shape)
+        iou_max_scores, bestboxes_args = torch.max(iou_scores, dim=0)
         objness = target_matrix[..., self.C].unsqueeze(3)
         # indexing box confidence, location
-        start_id = self.C+1 + (bestbox_arg-1)*4 + 2
-        stop_id = start_id + 4
-        print(">>>\t ", bestbox_arg, start_id, stop_id)
-        # gndtruth_box shape: (N, S, S, 4), where 4: x, y, w, h
-        gndtruth_box = objness * target_matrix[..., self.C+1:self.C+5] 
+        print("maxargs >>>\t ", bestboxes_args.shape)
+        
+        gndtruth_box = objness * target_matrix[..., 21:25] 
         gndtruth_box[..., 2:4] = torch.sqrt(gndtruth_box[..., 2:4])
         # p_anchor_box shape: (N, S, S, 4), where 4: x, y, w, h
-        p_anchor_box = objness* predection_matrix[..., start_id:stop_id]
+        p_anchor_box = objness * (bestboxes_args * predection_matrix[..., 26:30]
+            + (1 - bestboxes_args) * predection_matrix[..., 21:25])
+        print("p_anchor_box >>> ", p_anchor_box.shape)
+        print("predection_matrix >>> ", predection_matrix.shape)
         # prevent grads of being zero or box dims being negative value
-        p_anchor_box[..., 2:4] = torch.sqrt(torch.abs(p_anchor_box[..., 2:4]+1e-6))
-        p_anchor_box_sign = torch.sign(p_anchor_box[..., 2:4])
-        p_anchor_box = p_anchor_box * p_anchor_box_sign
+        p_anchor_box_w_h = p_anchor_box[..., 2:4]
+        p_anchor_box_w_h = torch.sign(p_anchor_box_w_h)*torch.sqrt(torch.abs(p_anchor_box_w_h+1e-6))
+        p_anchor_box[..., 2:4] = p_anchor_box_w_h
         # -------------- Box Coordinates Loss --------------
         # out should be flattened shape (N*S*S, 4)
         box_loc_loss = self.mse(
-            torch.flatten(gndtruth_box, end_dim=-2),
+            torch.flatten(gndtruth_box, end_dim=-2), 
             torch.flatten(p_anchor_box, end_dim=-2)
         )
+        print("box_loc_loss >>> ", box_loc_loss.shape)
+        # print("\n"*3, "objness >>> ", objness, "\n"*3)
         # --------------    Object Loss    --------------
         # flattned shape would be (N*S*S)
+        p_box_score = objness * (bestboxes_args * predection_matrix[..., 25:26]
+            + (1 - bestboxes_args) * predection_matrix[..., 20:21])
         objness_loss = self.mse(
-            torch.flatten(objness * target_matrix[..., self.C]),
-            torch.flatten(objness * predection_matrix[..., start_id-1])
+            torch.flatten(objness * target_matrix[..., 20:21]),
+            torch.flatten(objness * p_box_score)
         )
+        print("objness_loss >>> ", objness_loss.shape)
         # --------------    No Object Loss    --------------
         no_objness_loss = self.mse(
-            torch.flatten((1-objness) * target_matrix[..., self.C]),
-            torch.flatten((1-objness) * predection_matrix[..., start_id-1])
+            torch.flatten((1-objness) * target_matrix[..., 20:21]),
+            torch.flatten((1-objness) * predection_matrix[..., 20:21])
         )
+        no_objness_loss += self.mse(
+            torch.flatten((1-objness) * target_matrix[..., 20:21]),
+            torch.flatten((1-objness) * predection_matrix[..., 25:26])
+        )
+        print("no_objness_loss >>> ", no_objness_loss.shape)
+
         # --------------    Class Loss    --------------
         # (N, S, S, 20) --> (N*S*S, 20)
         class_loss = self.mse(
             torch.flatten(objness * target_matrix[..., :self.C], end_dim=-2),
             torch.flatten(objness * predection_matrix[..., :self.C], end_dim=-2)
         )
+        print("class_loss >>> ", class_loss.shape)
+
         loss = (self.coord * box_loc_loss) + objness_loss
         loss +=  (self.p_noobj * no_objness_loss) + class_loss
+
+        return loss
