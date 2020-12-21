@@ -41,7 +41,7 @@ class VOCDataset(torch.utils.data.Dataset):
         annotations = torch.tensor(annotations)
         if self.tansform:
             img, boxes = self.tansform(img, annotations)
-        # target output shape --> (S, S, C+5)
+        # target output shape --> (S, S, C+ 5*B)
         target_matrix = torch.zeros((self.S, self.S, self.C + 5*self.B))
         # PIL image shape --> (w, h, c)
         for class_id, box in annotations:
@@ -50,7 +50,8 @@ class VOCDataset(torch.utils.data.Dataset):
             # normalize dims relative to cell dims
             normed_box = self._norm_box_dims(box)
             target_matrix[i, j, [self.C, class_id] = 1
-            target_matrix[i, j, self.C+1:] = torch.tensor(normed_box)
+            target_matrix[i, j, self.C+1:self.C+5] = torch.tensor(normed_box)
             
         return img, target_matrix   
+
 # VOCDataset()

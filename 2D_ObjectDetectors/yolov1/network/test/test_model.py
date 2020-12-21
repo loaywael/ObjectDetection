@@ -9,8 +9,8 @@ class TestModel(TestCase):
         self.x = torch.randn((2, 3, 448, 448))
         self.y = torch.randn((2, 7, 7, 30))
         self.model = Yolov1(grid_size=7, num_boxes=2, num_classes=20)
-        self.model_loss = YoloLoss(7, 2, 20)
         self.predictions = self.model(self.x)
+        self.model_loss = YoloLoss(7, 2, 20)
 
     def test_yolov1(self):
         prediction_shape = list(self.predictions.shape)
