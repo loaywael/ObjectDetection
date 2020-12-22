@@ -18,7 +18,7 @@ def eval_iou(target_boxes, predicted_boxes):
     Return
     ------
     iou_scores : (torch.tensor)
-        iou scores of shape --> (N, 1)
+        iou scores of shape --> (N, S, S, 1)
     """
     tb_cx, tb_cy, tb_w, tb_h  = target_boxes.split(1, dim=3)
     pb_cx, pb_cy, pb_w, pb_h = predicted_boxes.split(1, dim=3)

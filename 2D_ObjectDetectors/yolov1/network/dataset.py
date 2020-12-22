@@ -19,9 +19,28 @@ class VOCDataset(torch.utils.data.Dataset):
         self.C = C
 
     def __len__(self):
+        """
+        Returns the length of the data generator
+        """
         return len(self.annotations)
 
     def _norm_box_dims(self, box):
+        """
+        Normalising the boxes relative to their associated grid cell dimensions, 
+        where each given box is normalised relative to its image dimensions
+
+        Params
+        ------
+        box : (torch.tensor)
+            normalised box relative to its image dimensions
+            {class, cx, cy, w, h} of shape-- > (4, )
+
+        Return
+        ------
+        normed_box : (torch.tensor)
+            normalised box relative to its cell dimensions
+            {class, cx, cy, w, h} of shape-- > (4, )
+        """
         x, y, w, h = box
         cx, cy = self.S*x - j, self.S*y - i     # relative to cell origin
         w, h = self.S*w, self.S*h               # equivalent cell steps
@@ -31,6 +50,21 @@ class VOCDataset(torch.utils.data.Dataset):
         pass
 
     def __getitem__(self, index):
+        """
+        Applys all the required preprocessing pipeline over a single image
+
+        Params
+        ------
+        index : (int)
+            the index of the image to be preprocessed
+
+        Returns
+        -------
+        processed_img : (PIL.Image)
+            the preprocessed image
+        target_matrix : (troch.tensor)
+            true target matrix of shape --> (S, S, C+5*B)
+        """
         label_path = os.path.join(self.label_dir, self.annotations.iloc[index, 1])
         annotations = []
         with open(label_path) as f:

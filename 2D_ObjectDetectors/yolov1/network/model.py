@@ -153,10 +153,12 @@ class YoloLoss(nn.Module):
             output of the FCL layers of shape --> (N, S*S*(C+5*B))
 
         target_matrix : (torch.tensor)
-            true target matrix of shape --> (N, S, S, C + 5*B)
+            true target matrix of shape --> (N, S, S, C+5*B)
 
         Returns
         -------
+        loss : (torch.tensor)
+            the batch mean squared error of all grid cell boxes per image 
         """
         # reshaping predicted matrix from (N, S*S*(C+5*B)) --> (N, S, S, C+5*B)
         predection_matrix = predection_matrix.reshape((-1, self.S, self.S, self.C + self.B*5))
