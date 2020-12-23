@@ -68,12 +68,14 @@ class Yolov1(nn.Module):
     YOLOv1 Original Architecture as the author paper proposed
 
     """
-    def __init__(self, in_channels=3, **kwargs):
+    def __init__(self, input_size=(448, 448, 3), S=7, B=2, C=20, **kwargs):
         super(Yolov1, self).__init__()
         self._arch = ARCH_CONFIG
-        self.in_channels = in_channels
+        self.input_size = input_size[-1::-1]
+        print(self.input_size)
+        self.S, self.B, self.C = S, B, C
         self.darknet = self._build_darknet(self._arch)
-        self.fcls = self._build_fcls(**kwargs)
+        self.fcls = self._build_fcls(S, B, C, **kwargs)
 
     def forward(self, x):
         x = self.darknet(x)
@@ -90,7 +92,7 @@ class Yolov1(nn.Module):
         """
         layers = []
         # padding: same
-        in_channels = self.in_channels
+        in_channels = self.input_size[0]
         for layer in layers_config:
             if type(layer) == tuple:
                 (k, c, s, p) = layer
@@ -107,7 +109,8 @@ class Yolov1(nn.Module):
                         in_channels = c     # update next c_in = last c_out
         return nn.Sequential(*layers)
 
-    def _build_fcls(self, grid_size, num_boxes, num_classes):
+    @staticmethod
+    def _build_fcls(grid_size, num_boxes, num_classes):
         """
         Building the fully connected output layers
 

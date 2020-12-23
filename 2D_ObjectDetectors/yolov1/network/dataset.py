@@ -24,7 +24,8 @@ class VOCDataset(torch.utils.data.Dataset):
         """
         return len(self.annotations)
 
-    def _norm_box_dims(self, box):
+    @staticmethod
+    def _norm_box_dims(box, ncells):
         """
         Normalising the boxes relative to their associated grid cell dimensions, 
         where each given box is normalised relative to its image dimensions
@@ -35,6 +36,10 @@ class VOCDataset(torch.utils.data.Dataset):
             normalised box relative to its image dimensions
             {class, cx, cy, w, h} of shape-- > (4, )
 
+        ncells : (int)
+            number of cells per axis of the image, 
+            assuming ncells are equal in both x, y axes
+
         Return
         ------
         normed_box : (torch.tensor)
@@ -42,11 +47,11 @@ class VOCDataset(torch.utils.data.Dataset):
             {class, cx, cy, w, h} of shape-- > (4, )
         """
         x, y, w, h = box
-        cx, cy = self.S*x - j, self.S*y - i     # relative to cell origin
-        w, h = self.S*w, self.S*h               # equivalent cell steps
+        cx, cy = ncells*x - j, ncells*y - i     # relative to cell origin
+        w, h = ncells*w, ncells*h               # equivalent cell steps
         return [cx, cy, w, h]
 
-    def _denorm_box_dim(self, box):
+    def _denorm_box_dim(box):
         pass
 
     def __getitem__(self, index):
@@ -82,7 +87,7 @@ class VOCDataset(torch.utils.data.Dataset):
             # identify the box cell
             i, j = int(y * self.S), int(x * self.S)
             # normalize dims relative to cell dims
-            normed_box = self._norm_box_dims(box)
+            normed_box = self._norm_box_dims(box, self.S)
             target_matrix[i, j, [self.C, class_id] = 1
             target_matrix[i, j, self.C+1:self.C+5] = torch.tensor(normed_box)
             
