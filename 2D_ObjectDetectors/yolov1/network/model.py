@@ -72,7 +72,7 @@ class Yolov1(nn.Module):
         super(Yolov1, self).__init__()
         self._arch = ARCH_CONFIG
         self.input_size = input_size[-1::-1]
-        print(self.input_size)
+        # print(self.input_size)
         self.S, self.B, self.C = S, B, C
         self.darknet = self._build_darknet(self._arch)
         self.fcls = self._build_fcls(S, B, C, **kwargs)
@@ -129,7 +129,7 @@ class Yolov1(nn.Module):
             nn.Flatten(), 
             nn.Linear(S*S*1024, 4096), 
             nn.LeakyReLU(0.1),
-            nn.Linear(4096, S*S*(C + B*5)),     
+            nn.Linear(4096, S*S*B*(C+5)),     
             # to be reshaped later into (S, S, (C + B*5))
         ]
         return nn.Sequential(*output_layers)
@@ -153,53 +153,61 @@ class YoloLoss(nn.Module):
         Params
         ------
         predection_matrix : (torch.tensor)
-            output of the FCL layers of shape --> (N, S*S*(C+5*B))
+            output of the FCL layers of shape --> (N, S* S*B*(C+5))
 
         target_matrix : (torch.tensor)
-            true target matrix of shape --> (N, S, S, C+5*B)
+            true target matrix of shape --> (N, S, S, B, C+5)
 
         Returns
         -------
         loss : (torch.tensor)
             the batch mean squared error of all grid cell boxes per image 
         """
-        # reshaping predicted matrix from (N, S*S*(C+5*B)) --> (N, S, S, C+5*B)
-        predection_matrix = predection_matrix.reshape((-1, self.S, self.S, self.C + self.B*5))
+        # reshaping predicted matrix from (N, S* S*B*(C+5)) --> (N, S, S, B, C+5)
+        grid_shape = (-1, self.S, self.S, self.B, (self.C+5))
+        predection_matrix = predection_matrix.reshape(grid_shape)
+        anchor_boxes = predection_matrix[..., 21:25]
+        target_boxes = target_matrix[..., 21:25]
+        objness = target_matrix[..., self.C:self.C+1]
+        # print("debugger >>> ", predection_matrix.shape)
+        # print("debugger >>> ", anchor_boxes.shape)
+        # print("debugger >>> ", target_boxes.shape)
+        # print("debugger >>> ", objness.shape)
         # # scoring anchor boxes
-        iou_b1 = eval_iou(predection_matrix[..., 21:25], target_matrix[..., 21:25])
-        iou_b2 = eval_iou(predection_matrix[..., 26:30], target_matrix[..., 21:25])
-        iou_scores = torch.cat([iou_b1.unsqueeze(0), iou_b2.unsqueeze(0)], dim=0)
+        iou_scores = eval_iou(anchor_boxes, target_boxes)
+        print("debugger >>> ", iou_scores.shape)
         # print("ious shape >>> ", iou_scores.shape)
-
         # filtering predicted anchor boxes
-        iou_max_scores, bestboxes_args = torch.max(iou_scores, dim=0)
+        bestboxes_args = torch.argmax(iou_scores, dim=-2).squeeze()
+        bestboxes_args = bestboxes_args.reshape(-1)
         # print("maxargs >>>\t ", bestboxes_args.shape)
-        objness = target_matrix[..., self.C].unsqueeze(3)
+        print("debugger bestboxes_args >>> ", bestboxes_args.shape)
         # print("\n"*3, "objness >>> ", objness, "\n"*3)
 
         # indexing box confidence, location
-        gndtruth_box = objness * target_matrix[..., 21:25] 
+        gndtruth_box = objness * target_boxes
+        print("debugger >>> ", gndtruth_box.shape)
         gndtruth_box[..., 2:4] = torch.sqrt(gndtruth_box[..., 2:4])
-        # p_anchor_box shape: (N, S, S, 4), where 4: x, y, w, h
-        p_anchor_box = objness * (bestboxes_args * predection_matrix[..., 26:30]
-            + (1 - bestboxes_args) * predection_matrix[..., 21:25])
-        # print("p_anchor_box >>> ", p_anchor_box.shape)
-        print("target_matrix >>> ", target_matrix.shape)
-        print("predection_matrix >>> ", predection_matrix.shape)
+        # anchor_box shape: (N, S, S, 4), where 4: x, y, w, h
+        anchor_boxes = anchor_boxes.reshape(-1, 4)
+        print("crazy >>> ", anchor_boxes.shape)
+        anchor_box = objness.reshape(-1, 1)[bestboxes_args] * anchor_boxes[bestboxes_args]
+        print("anchor_box >>> ", anchor_box.shape)
+        print("target_box >>> ", gndtruth_box.shape)
 
         # prevent grads of being zero or box dims being negative value
-        p_anchor_box_w_h = p_anchor_box[..., 2:4]
-        p_anchor_box_w_h = torch.sign(p_anchor_box_w_h)*torch.sqrt(torch.abs(p_anchor_box_w_h+1e-6))
-        p_anchor_box[..., 2:4] = p_anchor_box_w_h
+        anchor_box_w_h = anchor_box[..., 2:4]
+        anchor_box_w_h = torch.sign(anchor_box_w_h)*torch.sqrt(torch.abs(anchor_box_w_h+1e-6))
+        anchor_box[..., 2:4] = anchor_box_w_h
 
         # -------------- Box Coordinates Loss --------------
         #           flattent(N, S, S, 4) --> (N*S*S, 4)
         box_loc_loss = self.mse(
             torch.flatten(gndtruth_box, end_dim=-2), 
-            torch.flatten(p_anchor_box, end_dim=-2)
+            torch.flatten(anchor_box, end_dim=-2)
         )
         # print("gndtruth_box >>> ", gndtruth_box.shape)
-        # print("p_anchor_box >>> ", p_anchor_box.shape)
+        # print("anchor_box >>> ", anchor_box.shape)
 
         # --------------    Object Loss    --------------
         #           flattent(N, S, S, 1) --> (N*S*S, 1)

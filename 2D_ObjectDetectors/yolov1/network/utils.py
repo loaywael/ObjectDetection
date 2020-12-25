@@ -20,8 +20,10 @@ def eval_iou(target_boxes, predicted_boxes):
     iou_scores : (torch.tensor)
         iou scores of shape --> (N, S, S, 1)
     """
-    tb_cx, tb_cy, tb_w, tb_h  = target_boxes.split(1, dim=3)
-    pb_cx, pb_cy, pb_w, pb_h = predicted_boxes.split(1, dim=3)
+    tb_cx, tb_cy, tb_w, tb_h  = target_boxes.split(1, dim=-1)
+    pb_cx, pb_cy, pb_w, pb_h = predicted_boxes.split(1, dim=-1)
+    print(tb_cx.shape, tb_cy.shape, tb_w.shape, tb_h.shape)
+    print(pb_cx.shape, pb_cy.shape, pb_w.shape, pb_h.shape)
     # midpoint anchor box format
     tb_x1, tb_y1 = tb_cx - tb_w/2, tb_cy - tb_h/2
     tb_x2, tb_y2 = tb_cx + tb_w/2, tb_cy + tb_h/2
