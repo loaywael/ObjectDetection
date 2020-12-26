@@ -239,31 +239,31 @@ class VOCDataset(torch.utils.data.Dataset):
         return boxes, class_ids, scores, [i, j, b]  
 
     @staticmethod
-    def show_boxes(image, boxes):
-        H, W, D = image.shape
-        assert D == 3
+    def show_boxes(image, boxes, class_ids, scores):
+        W, H = image.size
         fig, ax = plt.subplots(1)
         plt.imshow(image)
-        for (cx, cy, bw, bh) in boxes:
+        for i, (cx, cy, bw, bh) in enumerate(boxes):
+            # print(W, H, " >>> ", bw, bh)
             cx, cy = cx * W, cy * H
             bw, bh = bw * W, bh * H
             rec = patches.Rectangle(
                 (cx-bw//2, cy-bh//2), bw, bh, 
-                edgecolor="yellow", 
-                linewidth=3, facecolor="none"
+                edgecolor="yellow", alpha=1.,
+                linewidth=1.5, facecolor="none"
             )
             rec = patches.Rectangle(
-                (cx-bw//2, cy-(bh//2)-25), bw//4, 25, 
-                edgecolor="yellow", 
-                linewidth=3, facecolor="none"
+                (cx-bw//2, cy-bh//2), bw, bh, 
+                edgecolor="yellow", alpha=0.3,
+                linewidth=1.5, facecolor="y"
             )
-            ax.text(
-                (cx-bw//2)+5, cy-(bh//2)-20, 
-                bbox=dict(fill=False, edgecolor="r", linewidth=3)
+            txt = ax.text(
+                (cx-bw//2), cy-(bh//2),  f"{class_ids[i]:0.2f} | pc: {scores[i]}", size=5, 
+                ha="left", va="bottom", alpha=1,
+                bbox=dict(facecolor="yellow", edgecolor="black", linewidth=1, alpha=0.3),
             )
             ax.imshow(image)
             ax.add_patch(rec)
-            plt.pause(0.0001)
+            plt.pause(0.5)
         plt.show()
     
-    # def resizing
