@@ -146,7 +146,6 @@ class VOCDataset(torch.utils.data.Dataset):
         bw, bh = bw/S, bh/S
         return torch.hstack([cx, cy, bw, bh])
 
-
     def __getitem__(self, index):
         """
         Applys all the required preprocessing pipeline over a single image
@@ -240,6 +239,24 @@ class VOCDataset(torch.utils.data.Dataset):
 
     @staticmethod
     def show_boxes(image, boxes, class_ids, scores):
+        """
+        Draws the bounding boxes, class id, score for each given box over the image
+
+        Params
+        ------
+        image : (PIL.Image)
+            src image to draw over and show
+        
+        boxes : (torch.tensor), (numpy.ndarray), or (list) 
+            the bounding boxes locations --> (M, 4)
+
+        class_ids : (torch.tensor), or (int)
+            the boxes class id --> (M, 1)
+
+        scores : (torch.tensor), or (int)
+            the boxes score --> (M, 1)
+
+        """
         W, H = image.size
         fig, ax = plt.subplots(1)
         plt.imshow(image)

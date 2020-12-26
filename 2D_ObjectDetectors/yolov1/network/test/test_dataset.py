@@ -88,7 +88,8 @@ class TestModel(TestCase):
         img2.close()
 
     def test_norm_denorm(self):
-        img, target = self.dataset.__getitem__(1)
+        imgsrc, target = self.dataset.__getitem__(1)
+        img = imgsrc.resize(448, 448)
         target = target.unsqueeze(0)
         # print(target.shape)
         boxes, class_ids, scores, [i, j, b] = VOCDataset.get_bboxes(target)
