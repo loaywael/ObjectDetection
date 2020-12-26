@@ -165,7 +165,7 @@ class VOCDataset(torch.utils.data.Dataset):
         """
         img_path = os.path.join(self.img_dir, self.annotations.iloc[index, 0])
         label_path = os.path.join(self.label_dir, self.annotations.iloc[index, 1])
-        img = Image.open(img_path)
+        img = Image.open(img_path).resize((448, 448))
         annotations = []    # all boxes annotations in the image
         with open(label_path) as csv_f:
             boxes_annotations = csv_f.readlines()
@@ -238,7 +238,7 @@ class VOCDataset(torch.utils.data.Dataset):
         return boxes, class_ids, scores, [i, j, b]  
 
     @staticmethod
-    def show_boxes(image, boxes, class_ids, scores):
+    def show_boxes(image, boxes, class_ids, scores, img_size=None):
         """
         Draws the bounding boxes, class id, score for each given box over the image
 
@@ -257,6 +257,7 @@ class VOCDataset(torch.utils.data.Dataset):
             the boxes score --> (M, 1)
 
         """
+        image = image.resize(img_size) if img_size else image
         W, H = image.size
         fig, ax = plt.subplots(1)
         plt.imshow(image)
@@ -267,7 +268,7 @@ class VOCDataset(torch.utils.data.Dataset):
             rec = patches.Rectangle(
                 (cx-bw//2, cy-bh//2), bw, bh, 
                 edgecolor="yellow", alpha=1.,
-                linewidth=1.5, facecolor="none"
+                linewidth=1.5, facecolor="none", linestyle="-"
             )
             rec = patches.Rectangle(
                 (cx-bw//2, cy-bh//2), bw, bh, 

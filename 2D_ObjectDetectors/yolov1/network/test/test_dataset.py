@@ -89,7 +89,6 @@ class TestModel(TestCase):
 
     def test_norm_denorm(self):
         imgsrc, target = self.dataset.__getitem__(1)
-        img = imgsrc.resize(448, 448)
         target = target.unsqueeze(0)
         # print(target.shape)
         boxes, class_ids, scores, [i, j, b] = VOCDataset.get_bboxes(target)
@@ -100,8 +99,9 @@ class TestModel(TestCase):
         # self.assertEqual(torch.round(boxes[1].tolist(), [0.339, 0.669, 0.402, 0.421]))
         # self.assertEqual(torch.round(boxes[2].tolist(), [0.555, 0.703, 0.078, 0.349]))
         # self.assertEqual(torch.round(boxes[3].tolist(), [0.612, 0.709, 0.084, 0.347]))
-        VOCDataset.show_boxes(img, boxes, class_ids, scores)
-        img.close()
+        org_size = (500, 375)
+        VOCDataset.show_boxes(imgsrc, boxes, class_ids, scores, img_size=org_size)
+        imgsrc.close()
 
 
 
