@@ -10,14 +10,14 @@ def eval_iou(target_boxes, predicted_boxes):
     Params
     ------
     target_boxes : (torch.tensor)
-        midpoint format boxes {cx, cy, w, h} of shape --> (N, S, S, 4) 
+        midpoint format boxes {cx, cy, w, h} of shape --> (N, 4) 
     predicted_boxes : (torch.tensor)
-        {cx, cy, w, h} of shape --> (N, S, S, 4) 
+        {cx, cy, w, h} of shape --> (N, 4) 
     
     Return
     ------
     iou_scores : (torch.tensor)
-        iou scores of shape --> (N, S, S, 1)
+        iou scores of shape --> (N, 1)
     """
     gboxes = change_boxes_format(target_boxes)
     pboxes = change_boxes_format(predicted_boxes)

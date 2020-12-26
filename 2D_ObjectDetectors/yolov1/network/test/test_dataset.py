@@ -32,32 +32,7 @@ class TestModel(TestCase):
             shuffle=False
         )
         # self.test_data = DataLoader(self.dataset, **dataloader_args)
-        # self.model = Yolov1(S=S, B=B, C=C)
         # print("data size: ", len(self.test_data))
-
-    # def test_yolov1(self):
-    #     prediction_shape = list(self.predictions.shape)
-    #     self.assertEqual(prediction_shape, [2, 1470])
-    #     print(prediction_shape)
-
-    # def test_norm_denorm_box(self):
-    #     img = np.zeros((448, 448, 3), "uint8")
-    #     w, h, c = img.shape
-    #     # box1 = [0.5*w, 0.5*h, 0.5*w, 0.5*h]
-    #     i, j = 4, 2
-    #     box1 = [0.3, 0.7, 0.5, 0.5]
-    #     normed_boxes = VOCDataset._norm_box_dims(box1, S, i, j)
-    #     denormed_box1 = VOCDataset._denorm_box_dims(normed_box1, S, i, j)
-    #     i, j = 3, 3
-    #     box1 = [0.5, 0.5, 0.5, 0.5]
-
-    #     normed_box1 = VOCDataset._norm_box_dims(box1, S, i, j)
-    #     denormed_box1 = VOCDataset._denorm_boxes_dims(normed_box1, S, i, j)
-    #     self.assertEqual(box1, denormed_box1)
-        # print("---> ", "box1: ", box1)
-        # print("---> ", "normed_box1: ", normed_box1)
-        # print("---> ", "denormed_box1: ", denormed_box1)
-        # normed_box1 = VOCDataset.show_boxes(img, [box1])
 
 
     def test_get_box_shapes(self):
@@ -78,11 +53,26 @@ class TestModel(TestCase):
         target = torch.cat([target1.unsqueeze(0), target2.unsqueeze(0)])
         normed_boxes, class_ids, scores, [i, j, b] = VOCDataset.get_bboxes(target)
         denormed_boxes = VOCDataset._denorm_batch_boxes_dims(normed_boxes, S, i, j)
-        # self.assertEqual(torch.round(boxes[0], 4).tolist(), [0.6410, 0.5706, 0.7180, 0.8408])
-        # self.assertEqual(torch.round(boxes[1], 4).tolist(), [0.3790, 0.5667, 0.1580, 0.3813]))
-        # self.assertEqual(torch.round(boxes[2], 4).tolist(), [0.3390, 0.6693, 0.4020, 0.4213]))
-        # self.assertEqual(torch.round(boxes[3], 4).tolist(), [0.5550, 0.7027, 0.0780, 0.3493]))
-        # self.assertEqual(torch.round(boxes[3], 4).tolist(), [0.6120, 0.7093, 0.0840, 0.3467]))
+        np.testing.assert_array_almost_equal(
+            denormed_boxes[0].tolist(), 
+            [0.6410, 0.5706, 0.7180, 0.8408], decimal=3
+        )
+        np.testing.assert_array_almost_equal(
+            denormed_boxes[1].tolist(), 
+            [0.3790, 0.5667, 0.1580, 0.3813], decimal=3
+        )
+        np.testing.assert_array_almost_equal(
+            denormed_boxes[2].tolist(), 
+            [0.3390, 0.6693, 0.4020, 0.4213], decimal=3
+        )
+        np.testing.assert_array_almost_equal(
+            denormed_boxes[3].tolist(), 
+            [0.5550, 0.7027, 0.0780, 0.3493], decimal=3
+        )
+        np.testing.assert_array_almost_equal(
+            denormed_boxes[4].tolist(), 
+            [0.6120, 0.7093, 0.0840, 0.3467], decimal=3
+        )
         # print(denormed_boxes)
         img1.close()
         img2.close()
@@ -93,20 +83,32 @@ class TestModel(TestCase):
         # print(target.shape)
         boxes, class_ids, scores, [i, j, b] = VOCDataset.get_bboxes(target)
         # print(boxes, "\n")
-        boxes = VOCDataset._denorm_batch_boxes_dims(boxes, S, i, j)
+        denormed_boxes = VOCDataset._denorm_batch_boxes_dims(boxes, S, i, j)
         # print(boxes)
-        # self.assertEqual(torch.round(boxes[0], 3).tolist(), [0.379, 0.567, 0.158, 0.381])
-        # self.assertEqual(torch.round(boxes[1].tolist(), [0.339, 0.669, 0.402, 0.421]))
-        # self.assertEqual(torch.round(boxes[2].tolist(), [0.555, 0.703, 0.078, 0.349]))
-        # self.assertEqual(torch.round(boxes[3].tolist(), [0.612, 0.709, 0.084, 0.347]))
+        np.testing.assert_array_almost_equal(
+            denormed_boxes[0].tolist(), 
+            [0.379, 0.567, 0.158, 0.381], decimal=3
+        )
+        np.testing.assert_array_almost_equal(
+            denormed_boxes[1].tolist(), 
+            [0.339, 0.669, 0.402, 0.421], decimal=3
+        )
+        np.testing.assert_array_almost_equal(
+            denormed_boxes[2].tolist(), 
+            [0.555, 0.703, 0.078, 0.349], decimal=3
+        )
+        np.testing.assert_array_almost_equal(
+            denormed_boxes[3].tolist(), 
+            [0.612, 0.709, 0.084, 0.347], decimal=3
+        )
         org_size = (500, 375)
-        VOCDataset.show_boxes(imgsrc, boxes, class_ids, scores, img_size=org_size)
+        # VOCDataset.show_boxes(imgsrc, boxes, class_ids, scores, img_size=org_size)
         imgsrc.close()
 
 
 
-    def test_dataset(self):
-        pass
+    # def test_dataset(self):
+    #     pass
         # img, target = next(self.test_data)
         # for i, (img, target) in enumerate(self.test_data):
         #     print(img.shape, target.shape)
