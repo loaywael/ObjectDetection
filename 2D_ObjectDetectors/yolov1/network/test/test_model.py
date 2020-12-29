@@ -2,6 +2,7 @@ from unittest import TestCase
 import numpy as np
 import torch
 from network.model import Yolov1, YoloLoss
+from torchsummary import summary
 
 
 torch.manual_seed(13)
@@ -14,11 +15,12 @@ class TestModel(TestCase):
         self.model = Yolov1(S=7, B=2, C=20)
         self.predictions = self.model(self.x)
         self.model_loss = YoloLoss(7, 2, 20)
+        # summary(self.model, torch.Size([3, 448, 448]))
 
     def test_yolov1(self):
         prediction_shape = list(self.predictions.shape)
         self.assertEqual(prediction_shape, [2, 2450])
-        print(prediction_shape)
+        # print(prediction_shape)
 
     def test_yolo_loss(self):
         loss = self.model_loss(self.predictions, self.y)
