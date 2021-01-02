@@ -102,7 +102,7 @@ class TestModel(TestCase):
         #     [0.612, 0.709, 0.084, 0.347], decimal=3
         # )
         org_size = (500, 375)
-        VOCDataset.show_boxes(imgsrc, denormed_boxes, class_ids, scores, org_size)
+        VOCDataset.show_boxes(imgsrc, denormed_boxes, class_ids, scores)
         imgsrc.close()
 
 

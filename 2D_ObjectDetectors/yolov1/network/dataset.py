@@ -283,27 +283,27 @@ class VOCDataset(torch.utils.data.Dataset):
             # print(W, H, " >>> ", bw, bh)
             cx, cy = cx * W, cy * H
             bw, bh = bw * W, bh * H
-            # rec = patches.Rectangle(
-            #     (cx-bw//2, cy-bh//2), bw, bh, 
-            #     edgecolor="yellow", alpha=1.,
-            #     linewidth=1.5, facecolor="none", linestyle="-"
-            # )
-            # rec = patches.Rectangle(
-            #     (cx-bw//2, cy-bh//2), bw, bh, 
-            #     edgecolor="yellow", alpha=0.3,
-            #     linewidth=1.5, facecolor="y"
-            # )
-            # txt = ax.text(
-            #     (cx-bw//2), cy-(bh//2),  f"id: {class_ids[i]:0.2f} | pc: {scores[i]}", size=5, 
-            #     ha="left", va="bottom", alpha=1, color="white",
-            #     bbox=dict(facecolor="yellow", edgecolor="black", linewidth=1, alpha=0.3),
-            # )
+            rec = patches.Rectangle(
+                (cx-bw//2, cy-bh//2), bw, bh, 
+                edgecolor="yellow", alpha=1.,
+                linewidth=1.5, facecolor="none", linestyle="-"
+            )
+            rec = patches.Rectangle(
+                (cx-bw//2, cy-bh//2), bw, bh, 
+                edgecolor="yellow", alpha=0.3,
+                linewidth=1.5, facecolor="y"
+            )
+            txt = ax.text(
+                (cx-bw//2), cy-(bh//2),  f"id: {class_ids[i]:0.2f} | pc: {scores[i]}", size=5, 
+                ha="left", va="bottom", alpha=1, color="white",
+                bbox=dict(facecolor="yellow", edgecolor="black", linewidth=1, alpha=0.3),
+            )
             ax.imshow(image)
-            # ax.add_patch(rec)
+            ax.add_patch(rec)
+            ax.add_artist(plt.Circle((cx, cy), 5))
+            ax.set_xticks(np.linspace(0, 448, num=8))
+            ax.set_yticks(np.linspace(0, 448, num=8))
+            ax.grid(True)
             # plt.pause(0.5)
-            # ax.add_artist(plt.Circle((cx, cy), 5))
-            ax.set_xticks(np.linspace(0, 448, num=7))
-            # ax.set_yticks(np.linspace(0, 448, num=7))
-            # ax.grid(True)
         plt.show()
     
