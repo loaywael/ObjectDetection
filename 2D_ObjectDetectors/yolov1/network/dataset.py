@@ -146,6 +146,25 @@ class VOCDataset(torch.utils.data.Dataset):
         bw, bh = bw/S, bh/S
         return torch.hstack([cx, cy, bw, bh])
 
+    def get_cell_ids(self, box_center):
+        """
+        Locate the cell that contains the ceter point of the object bounding box
+
+        Params
+        ------
+        box_center : (tuple)
+            x, y location of the box midpoint
+
+        Returns
+        -------
+        cell_id : (tuple)
+            y, x indices of the cell
+        """
+        # i, j cell numbers in y, x starting from 0
+        cx, cy = box_center
+        i, j = int(cy * self.S) - 1, int(cx * self.S) - 1
+        return i, j
+
     def __getitem__(self, index):
         """
         Applys all the required preprocessing pipeline over a single image
@@ -180,8 +199,7 @@ class VOCDataset(torch.utils.data.Dataset):
         # PIL image shape --> (w, h, c)
         for class_id, (*box) in annotations:
             cx, cy, w, h = box  # identify the box cell
-            # i, j cell numbers in y, x starting from 0
-            i, j = int(cy * self.S) - 1, int(cx * self.S) - 1
+            i, j = self.get_cell_ids((cx, cy))
             # normalize dims relative to cell dims
             target_matrix[i, j, 0, int(self.C)] = 1    # conf_score
             target_matrix[i, j, 0, int(class_id)] = 1    # class_id
@@ -265,23 +283,27 @@ class VOCDataset(torch.utils.data.Dataset):
             # print(W, H, " >>> ", bw, bh)
             cx, cy = cx * W, cy * H
             bw, bh = bw * W, bh * H
-            rec = patches.Rectangle(
-                (cx-bw//2, cy-bh//2), bw, bh, 
-                edgecolor="yellow", alpha=1.,
-                linewidth=1.5, facecolor="none", linestyle="-"
-            )
-            rec = patches.Rectangle(
-                (cx-bw//2, cy-bh//2), bw, bh, 
-                edgecolor="yellow", alpha=0.3,
-                linewidth=1.5, facecolor="y"
-            )
-            txt = ax.text(
-                (cx-bw//2), cy-(bh//2),  f"{class_ids[i]:0.2f} | pc: {scores[i]}", size=5, 
-                ha="left", va="bottom", alpha=1,
-                bbox=dict(facecolor="yellow", edgecolor="black", linewidth=1, alpha=0.3),
-            )
+            # rec = patches.Rectangle(
+            #     (cx-bw//2, cy-bh//2), bw, bh, 
+            #     edgecolor="yellow", alpha=1.,
+            #     linewidth=1.5, facecolor="none", linestyle="-"
+            # )
+            # rec = patches.Rectangle(
+            #     (cx-bw//2, cy-bh//2), bw, bh, 
+            #     edgecolor="yellow", alpha=0.3,
+            #     linewidth=1.5, facecolor="y"
+            # )
+            # txt = ax.text(
+            #     (cx-bw//2), cy-(bh//2),  f"id: {class_ids[i]:0.2f} | pc: {scores[i]}", size=5, 
+            #     ha="left", va="bottom", alpha=1, color="white",
+            #     bbox=dict(facecolor="yellow", edgecolor="black", linewidth=1, alpha=0.3),
+            # )
             ax.imshow(image)
-            ax.add_patch(rec)
-            plt.pause(0.5)
+            # ax.add_patch(rec)
+            # plt.pause(0.5)
+            # ax.add_artist(plt.Circle((cx, cy), 5))
+            ax.set_xticks(np.linspace(0, 448, num=7))
+            # ax.set_yticks(np.linspace(0, 448, num=7))
+            # ax.grid(True)
         plt.show()
     

@@ -14,8 +14,8 @@ class TestModel(TestCase):
 
         self.model = Yolov1(S=7, B=2, C=20)
         self.predictions = self.model(self.x)
-        self.model_loss = YoloLoss(7, 2, 20)
-        # summary(self.model, torch.Size([3, 448, 448]))
+        # self.model_loss = YoloLoss(7, 2, 20)
+        print(summary(self.model.to("cuda"), torch.Size([3, 448, 448])))
 
     def test_yolov1(self):
         prediction_shape = list(self.predictions.shape)

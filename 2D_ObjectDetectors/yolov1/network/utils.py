@@ -1,5 +1,7 @@
 import torch
 import  numpy as np
+from collections import  Counter
+
 
 
 def eval_iou(target_boxes, predicted_boxes):
@@ -62,3 +64,30 @@ def non_max_suppression(bboxes, iou_threshold, prob_threshold):
                 bboxes.append(bbox)
         filtered_bboxes.append(chosen_bbox)
     return filtered_bboxes
+
+
+def eval_mAP(pred_boxes, true_boxes, iou_threshold, nclasses=20):
+    avg_prec = []
+    for c in range(num_classes):
+        detections = []
+        ground_truth = []
+        for detection in pred_boxes:
+            if detection[1] == c:
+                detections.append(detection)
+        for true_box in true_boxes:
+            if true_box[1] == c:
+                ground_truth.append(true_box)
+        num_boxes = Counter([gt[0] for gt in ground_truth])
+        for key, val in num_boxes.items():
+            num_boxes[key] = torch.zeros(val)
+        detections.sort(key=lambda x:x[2], reverse=True)
+        TP = torch.zeros((len(detections)))
+        FP = torch.zeros((len(detections)))
+        total_true_boxes = len(ground_truth)
+        for detection_id, detection in enumerate(detections):
+            gnd_true_img = [bbox for bbox in ground_truth if bbox[0]==detection[0]]
+            num_gts = len(gnd_true_img)
+            best_iou = 0
+            for idx, gt in enumerate(gnd_true_img):
+                pass
+            
