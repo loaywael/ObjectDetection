@@ -280,7 +280,7 @@ class VOCDataset(torch.utils.data.Dataset):
         fig, ax = plt.subplots(1)
         plt.imshow(image)
         for i, (cx, cy, bw, bh) in enumerate(boxes):
-            # print(W, H, " >>> ", bw, bh)
+        #     # print(W, H, " >>> ", bw, bh)
             cx, cy = cx * W, cy * H
             bw, bh = bw * W, bh * H
             rec = patches.Rectangle(
@@ -291,18 +291,19 @@ class VOCDataset(torch.utils.data.Dataset):
             rec = patches.Rectangle(
                 (cx-bw//2, cy-bh//2), bw, bh, 
                 edgecolor="yellow", alpha=0.3,
-                linewidth=1.5, facecolor="y"
+                linewidth=1.5, facecolor=(0, 0, 0)
             )
             txt = ax.text(
-                (cx-bw//2), cy-(bh//2),  f"id: {class_ids[i]:0.2f} | pc: {scores[i]}", size=5, 
-                ha="left", va="bottom", alpha=1, color="white",
-                bbox=dict(facecolor="yellow", edgecolor="black", linewidth=1, alpha=0.3),
+                (cx-bw//2), cy-(bh//2),  f"id: {class_ids[i]:0.2f} | pc: {scores[i]}", size=7, 
+                ha="left", va="top", alpha=1, color="white",
+                bbox=dict(facecolor="green", edgecolor="black", linewidth=1, alpha=0.3),
             )
             ax.imshow(image)
             ax.add_patch(rec)
             ax.add_artist(plt.Circle((cx, cy), 5))
             ax.set_xticks(np.linspace(0, 448, num=8))
             ax.set_yticks(np.linspace(0, 448, num=8))
+            fig.tight_layout()
             ax.grid(True)
             # plt.pause(0.5)
         plt.show()

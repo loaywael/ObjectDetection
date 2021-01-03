@@ -1,7 +1,8 @@
 from unittest import TestCase
 import numpy as np
 import torch
-from network.model import Yolov1, YoloLoss
+from network.model import Yolov1
+from network.loss import YoloLoss
 from torchsummary import summary
 
 
@@ -22,7 +23,7 @@ class TestModel(TestCase):
         self.assertEqual(prediction_shape, [2, 2450])
         # print(prediction_shape)
 
-    def test_yolo_loss(self):
-        loss = self.model_loss(self.predictions, self.y)
-        print(loss)
+    # def test_yolo_loss(self):
+    #     loss = self.model_loss(self.predictions, self.y)
+    #     print(loss)
     
