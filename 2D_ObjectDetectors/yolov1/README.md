@@ -169,10 +169,17 @@ Estimated Total Size (MB): 1491.00
 <br><br><br>
 
 # YOLO Loss
-```
-$$\lambda_{coord}\sum_{i=0}^{s^2}\sum_{j=0}^{B}\mathbb{1}^{obj}_{ij}(x_i-\hat{x_i})^2+(y_i-\hat{y_i})^2$$
-$$+\lambda_{coord}\sum_{i=0}^{s^2}\sum_{j=0}^{B}\mathbb{1}^{obj}_{ij}(\sqrt{w_i}-\sqrt{\hat{w_i}})^2+(\sqrt{h_i}-\sqrt{\hat{h_i}})^2$$
-$$+\lambda_{noobj}\sum_{i=0}^{s^2}\sum_{j=0}^{B}\mathbb{1}^{noobj}_{ij}(c_i-\hat{c_i})^2$$
-$$+\sum_{i=0}^{s^2}\sum_{j=0}^{B}\mathbb{1}^{obj}_{ij}(c_i-\hat{c_i})^2$$
-$$+\sum_{i=0}^{s^2}\mathbb{1}^{obj}_{i}\sum_{c\in{classes}}(p_i(c)-\hat{p}_i(c))^2$$
+
+<img src="assets/yolo_loss.png">
+
+```latex
+$\lambda_{coord}\sum_{i=0}^{s^2}\sum_{j=0}^{B}\mathbb{1}^{obj}_{ij}(x_i-\hat{x_i})^2+(y_i-\hat{y_i})^2$
+
+$+\lambda_{coord}\sum_{i=0}^{s^2}\sum_{j=0}^{B}\mathbb{1}^{obj}_{ij}(\sqrt{w_i}-\sqrt{\hat{w_i}})^2+(\sqrt{h_i}-\sqrt{\hat{h_i}})^2$
+
+$+\lambda_{noobj}\sum_{i=0}^{s^2}\sum_{j=0}^{B}\mathbb{1}^{noobj}_{ij}(c_i-\hat{c_i})^2$
+
+$+\sum_{i=0}^{s^2}\sum_{j=0}^{B}\mathbb{1}^{obj}_{ij}(c_i-\hat{c_i})^2$
+
+$+\sum_{i=0}^{s^2}\mathbb{1}^{obj}_{i}\sum_{c\in{classes}}(p_i(c)-\hat{p}_i(c))^2$
 ```
