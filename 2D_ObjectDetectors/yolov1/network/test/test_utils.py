@@ -1,9 +1,9 @@
+import torch
+import numpy as np
 from unittest import TestCase
 from torchvision import ops
-from network.utils import eval_iou
 from network.utils import change_boxes_format
-import numpy as np
-import torch
+from network.utils import eval_iou, non_max_suppression
 
 
 
@@ -28,5 +28,26 @@ class TestModel(TestCase):
         # print("iou_scores: ", ref_iou_scores)
         # print("-- "*15)
         # print("iou_scores: ", iou_scores)
+
+    def test_nms(self):
+        bboxes = [
+            [12, 84, 140, 212], 
+            [24, 84, 152, 212], 
+            [36, 84, 164, 212], 
+            [12, 96, 140, 224], 
+            [24, 96, 152, 224], 
+            [24, 108, 152, 236], 
+        ]
+        bboxes1 = torch.tensor(bboxes).type(torch.FloatTensor)
+        scores = [0.5, 0.7, 0.3, 0.2, 0.97, 0.95]
+        scores1 = torch.tensor(scores)
+
+        # boxes = non_max_suppression(bboxes, 0.5, 0.5)
+        boxes1_ids = ops.nms(bboxes1, scores1, 0.5)
+        
+        print(boxes)
+        print(bboxes1[boxes1_ids])
+
+
 
     

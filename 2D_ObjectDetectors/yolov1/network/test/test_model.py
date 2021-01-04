@@ -2,7 +2,6 @@ from unittest import TestCase
 import numpy as np
 import torch
 from network.model import Yolov1
-from network.loss import YoloLoss
 from torchsummary import summary
 
 
@@ -15,7 +14,6 @@ class TestModel(TestCase):
 
         self.model = Yolov1(S=7, B=2, C=20)
         self.predictions = self.model(self.x)
-        # self.model_loss = YoloLoss(7, 2, 20)
         print(summary(self.model.to("cuda"), torch.Size([3, 448, 448])))
 
     def test_yolov1(self):
