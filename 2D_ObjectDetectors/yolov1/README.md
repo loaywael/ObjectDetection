@@ -171,7 +171,7 @@ Estimated Total Size (MB): 1491.00
 # YOLO Loss
 
 <img src="assets/yolo_loss.png">
-
+<!-- <img src="https://www.bruot.org/tex2img/media/3seT9oQyi2KzaARYGKltEVAfCkEmNaC2AMjoMYEQhcSb/tex2img_equation.svg"> -->
 ```latex
 $\lambda_{coord}\sum_{i=0}^{s^2}\sum_{j=0}^{B}\mathbb{I}^{obj}_{ij}(x_i-\hat{x_i})^2+(y_i-\hat{y_i})^2$
 
