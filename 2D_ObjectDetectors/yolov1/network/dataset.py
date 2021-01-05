@@ -180,7 +180,7 @@ class VOCDataset(torch.utils.data.Dataset):
             the preprocessed image
         target_matrix : (troch.tensor)
             each box vector is [C0, ..., Cn, pc, cx, cy, w, h]
-            true target matrix of shape --> (S, S, B, C+5)
+            true target matrix of shape --> (S, S, C+5*B)
         """
         img_path = os.path.join(self.img_dir, self.annotations.iloc[index, 0])
         label_path = os.path.join(self.label_dir, self.annotations.iloc[index, 1])
@@ -194,21 +194,21 @@ class VOCDataset(torch.utils.data.Dataset):
 
         if self.transform:
             img, boxes = self.tansform(img, annotations)
-        # target output shape --> (S, S, B, C+5)
-        target_matrix = torch.zeros((self.S, self.S, self.B, self.C+5))
+        # target output shape --> (S, S, C+5*B)
+        target_matrix = torch.zeros((self.S, self.S, self.C+5*self.B))
         # PIL image shape --> (w, h, c)
         for class_id, (*box) in annotations:
             cx, cy, w, h = box  # identify the box cell
             i, j = self.get_cell_ids((cx, cy))
             # normalize dims relative to cell dims
-            target_matrix[i, j, 0, int(self.C)] = 1    # conf_score
-            target_matrix[i, j, 0, int(class_id)] = 1    # class_id
+            target_matrix[i, j, int(self.C)] = 1    # conf_score
+            target_matrix[i, j, int(class_id)] = 1    # class_id
             normed_box = self._norm_box_dims(box, self.S, i, j)
-            target_matrix[i, j, 0, self.C+1:self.C+5] = torch.tensor(normed_box)
+            target_matrix[i, j, self.C+1:self.C+5] = torch.tensor(normed_box)
         return img, target_matrix   
     
     @staticmethod
-    def get_bboxes(y_matrix, threshold=0.5):
+    def get_target_boxes(y_matrix, threshold=0.5):
         """
         Takes target/prediction matrix and filters all the found boxes returning 
         their location, class_id, score and their grid cell indices.
@@ -216,7 +216,7 @@ class VOCDataset(torch.utils.data.Dataset):
         Params
         ------
         y_matrix : (torch.tensor)
-            prediction/target matrix of shape --> (N, S, S, B, C+5)
+            prediction/target matrix of shape --> (N, S, S, C+5*B)
 
         threshold : (float)
             boxes score threshold filter to keep the good boxes only
@@ -251,9 +251,9 @@ class VOCDataset(torch.utils.data.Dataset):
         # select mask needs the input tensor, mask have equal dims and returns flattend tensor
         boxes = torch.masked_select(anchor_boxes, score_mask.unsqueeze(-1)).reshape(-1, 4)
         class_ids = torch.masked_select(boxes_class, score_mask)
-        _, i, j, b = torch.where(score_mask == 1)   # retrieving the grid cell indices of each filtered box
+        _, i, j = torch.where(score_mask == 1)   
         i, j = i.unsqueeze(-1), j.unsqueeze(-1)     # converting to col-vector to be used to denorm-boxes
-        return boxes, class_ids, scores, [i, j, b]  
+        return boxes, class_ids, scores, [i, j]  
 
     @staticmethod
     def show_boxes(image, boxes, class_ids, scores, img_size=None):
@@ -294,7 +294,7 @@ class VOCDataset(torch.utils.data.Dataset):
                 linewidth=1.5, facecolor=(0, 0, 0)
             )
             txt = ax.text(
-                (cx-bw//2), cy-(bh//2),  f"id: {class_ids[i]:0.2f} | pc: {scores[i]}", size=7, 
+                (cx-bw//2), cy-(bh//2),  f"id: {class_ids[i]:0.2f} | pc: {scores[i]}", size=10, 
                 ha="left", va="top", alpha=1, color="white",
                 bbox=dict(facecolor="green", edgecolor="black", linewidth=1, alpha=0.3),
             )
