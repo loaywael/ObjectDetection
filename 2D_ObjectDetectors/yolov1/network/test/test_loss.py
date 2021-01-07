@@ -55,7 +55,12 @@ class TestLoss(TestCase):
 
     def test_loss(self):
         
-        img1, target1 = self.dataset.__getitem__(0)
-        print(target1.shape)
-        loss = self.model_loss(self.y.to("cuda"), self.yhat.to("cuda"))
+        img1, target = self.dataset.__getitem__(1)
+        y = target.unsqueeze(0)
+        yhat = y.clone()
+        yhat[..., 21:23] += 0.05
+        yhat[..., 26:28] += 0.6
+        # print(y, "\n\n\n")
+        # print(yhat, "\n\n\n")
+        loss = self.model_loss(y.cuda(), yhat.cuda())
         print(loss)

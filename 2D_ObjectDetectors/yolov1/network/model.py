@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from torchvision.models import ResNet
 from network.utils import eval_iou
 from network.config import ARCH_CONFIG
 
@@ -40,13 +41,13 @@ class ConvBlock(nn.Module):
         return self.leakyrelu(self.batchnorm(self.conv(x)))
 
 
-class Yolov1(nn.Module):
+class YoloDarknetv1(nn.Module):
     """
     YOLOv1 Original Architecture as the author paper proposed
 
     """
     def __init__(self, input_size=(448, 448, 3), S=7, B=2, C=20, **kwargs):
-        super(Yolov1, self).__init__()
+        super(YoloDarknetv1, self).__init__()
         self._arch = ARCH_CONFIG
         self.input_size = input_size[-1::-1]
         # print(self.input_size)
@@ -111,3 +112,74 @@ class Yolov1(nn.Module):
         ]
         return nn.Sequential(*output_layers)
 
+
+class YoloResnetv1(nn.Module):
+    """
+    YOLOv1 Original Architecture as the author paper proposed
+
+    """
+    def __init__(self, input_size=(448, 448, 3), S=7, B=2, C=20, **kwargs):
+        super(YoloResnetv1, self).__init__()
+        self._arch = ARCH_CONFIG
+        self.input_size = input_size[-1::-1]
+        # print(self.input_size)
+        self.S, self.B, self.C = S, B, C
+        self.resnet = self._build_darknet(self._arch)
+        self.fcls = self._build_fcls(S, B, C, **kwargs)
+
+    def forward(self, x):
+        x = self.resnet(x)
+        return self.fcls(torch.flatten(x, start_dim=1))
+    
+    def _build_darknet(self, layers_config):
+        """
+        Building the Darknet Backbone feature extraction network
+
+        Params
+        ------
+        layers_config : (list)
+            network layers configurations
+        """
+        layers = []
+        # padding: same
+        in_channels = self.input_size[0]
+        for layer in layers_config:
+            if type(layer) == tuple:
+                (k, c, s, p) = layer
+                layers.append(ConvBlock(in_channels, k, c, s, p))
+                in_channels = c
+            elif type(layer) == str:
+                layers.append(nn.MaxPool2d(kernel_size=(2, 2), stride=2))
+            elif type(layer) == list:
+                # i.e. repeated blocks group
+                *sub_blocks, n = layer
+                for i in range(n):
+                    for (k, c, s, p) in sub_blocks:
+                        layers.append(ConvBlock(in_channels, k, c, s, p))
+                        in_channels = c     # update next c_in = last c_out
+        return nn.Sequential(*layers)
+
+    @staticmethod
+    def _build_fcls(grid_size, num_boxes, num_classes):
+        """
+        Building the fully connected output layers
+
+        Params
+        ------
+        grid_size: (int)
+            number of grid cells per axe of the input image
+        num_boxes: (int)
+            number of anchor boxes per grid cell
+        num_classes: (int)
+            number of classes in the dataset
+        
+        """
+        S, B, C = grid_size, num_boxes, num_classes
+        output_layers = [
+            nn.Flatten(), 
+            nn.Linear(S*S*1024, 4096), 
+            nn.LeakyReLU(0.1),
+            nn.Linear(4096, S*S*B*(C+5)),     
+            # to be reshaped later into (S, S, (C + B*5))
+        ]
+        return nn.Sequential(*output_layers)

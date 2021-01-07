@@ -87,7 +87,7 @@ class YoloLoss(nn.Module):
         obj_loss = self.mse(pred_box[:, 0], target_box[:, 0])
         noobj_loss = self.mse(noobj_pred_conf, noobj_target_conf)
         class_loss = self.mse(pred_classes, target_classes)
-        # print("iou score >>> ", pred_box, target_box, target_iou)
+        # print("iou score >>> ", pred_box, target_box, target_iou)     # prints (N, pb), (N, tb), (N, pc)
         loss = (self.coord * (xy_loss+wh_loss)) + obj_loss + (self.noobj * noobj_loss) + class_loss
         
         return loss / float(N)

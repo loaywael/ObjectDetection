@@ -27,6 +27,7 @@ IMG_DIR = "data/images/"
 LABEL_DIR = "data/labels/"
 
 
+
 def train(model, optimizer, loss_fn, train_loader):
     loop = tqdm.tqdm(train_loader)
     mean_loss = []
