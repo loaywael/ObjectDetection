@@ -326,27 +326,27 @@ class VOCDataset(torch.utils.data.Dataset):
         plt.imshow(image)
         for i, box in enumerate(boxes):
             (cx, cy, bw, bh) = VOCDataset.restore_box_dim(box.squeeze(), image.size)
-            # rec = patches.Rectangle(
-            #     (cx-bw//2, cy-bh//2), bw, bh, 
-            #     edgecolor="yellow", alpha=0.3,
-            #     linewidth=2, facecolor=(0, 0, 0)
-            # )
-            # ax.add_patch(rec)
-            # rec = patches.Rectangle(
-            #     (cx-bw//2, cy-bh//2), bw, bh, 
-            #     edgecolor="yellow", alpha=0.3,
-            #     linewidth=2, facecolor="none", linestyle="-"
-            # )
-            # if class_ids is not None and scores is not None:
-            #     txt = ax.text(
-            #         (cx-bw//2), cy-(bh//2),  f"id: {int(class_ids[i]):0.2f} | pc: {float(scores[i])}", size=10, 
-            #         ha="left", va="top", alpha=1, color="black",
-            #         bbox=dict(facecolor="yellow", edgecolor="yellow", linewidth=1, alpha=0.3),
-            #     )
-            # ax.add_patch(rec)
-            # ax.scatter(cx, cy, marker="+", s=50, c="yellow")
-            ax.set_xticks(np.linspace(0, 448, num=self.S+1))
-            ax.set_yticks(np.linspace(0, 448, num=self.S+1))
+            rec = patches.Rectangle(
+                (cx-bw//2, cy-bh//2), bw, bh, 
+                edgecolor="yellow", alpha=0.3,
+                linewidth=2, facecolor=(0, 0, 0)
+            )
+            ax.add_patch(rec)
+            rec = patches.Rectangle(
+                (cx-bw//2, cy-bh//2), bw, bh, 
+                edgecolor="yellow", alpha=0.3,
+                linewidth=2, facecolor="none", linestyle="-"
+            )
+            if class_ids is not None and scores is not None:
+                txt = ax.text(
+                    (cx-bw//2), cy-(bh//2),  f"id: {int(class_ids[i]):0.2f} | pc: {float(scores[i])}", size=10, 
+                    ha="left", va="top", alpha=1, color="black",
+                    bbox=dict(facecolor="yellow", edgecolor="yellow", linewidth=1, alpha=0.3),
+                )
+            ax.add_patch(rec)
+            ax.scatter(cx, cy, marker="+", s=50, c="yellow")
+            ax.set_xticks(np.linspace(0, image.size[0], num=self.S+1))
+            ax.set_yticks(np.linspace(0, image.size[0], num=self.S+1))
             fig.tight_layout()
             ax.grid(True)
         plt.show()

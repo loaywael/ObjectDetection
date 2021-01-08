@@ -5,7 +5,6 @@ from network.utils import eval_iou
 from network.config import ARCH_CONFIG
 
 
-
 class ConvBlock(nn.Module):
     """
     Darknet Convolution Block to be used to build the Darknet
@@ -123,33 +122,29 @@ class YoloResnetv1(nn.Module):
         self.input_size = input_size[-1::-1]
         self.S, self.B, self.C = S, B, C
         self.resnet = models.resnet50(pretrained=True, progress=True)
-        self.fcls = self._build_fcls(S, B, C, **kwargs)
+        self.resnet = nn.Sequential(*list(self.resnet.children())[:-2])
+        self.fcls = self._build_fcls(**kwargs)
+        for param in self.resnet.parameters():
+            param.requires_grad = False
 
     def forward(self, x):
         x = self.resnet(x)
-        return self.fcls(torch.flatten(x, start_dim=1))
+        print(x.shape)
+        return self.fcls(x)
     
-    @staticmethod
-    def _build_fcls(grid_size, num_boxes, num_classes):
+    def _build_fcls(self):
         """
         Building the fully connected output layers
-
-        Params
-        ------
-        grid_size: (int)
-            number of grid cells per axe of the input image
-        num_boxes: (int)
-            number of anchor boxes per grid cell
-        num_classes: (int)
-            number of classes in the dataset
-        
         """
-        S, B, C = grid_size, num_boxes, num_classes
+        S, B, C = self.S, self.B, self.C
         output_layers = [
-            nn.Flatten(), 
-            nn.Linear(S*S*1024, 4096), 
+            nn.Conv2d(2048, 1024, 3, bias=False),
+            nn.BatchNorm2d(1024),
+            nn.Dropout(0.5),
             nn.LeakyReLU(0.1),
-            nn.Linear(4096, S*S*B*(C+5)),     
-            # to be reshaped later into (S, S, (C + B*5))
+            nn.AdaptiveAvgPool2d((9, 9)), 
+            nn.Conv2d(1024, (C+5*B), 1, bias=False),
+            nn.Dropout(0.5),
+            nn.Flatten()
         ]
         return nn.Sequential(*output_layers)

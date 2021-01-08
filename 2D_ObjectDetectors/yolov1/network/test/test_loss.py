@@ -27,7 +27,7 @@ torch.manual_seed(13)
 class TestLoss(TestCase):
     def setUp(self):
         self.model_loss = YoloLoss(7, 2, 20)
-        dataset_args = dict(S=S, B=B, C=C, transform=TRANSFORM)
+        dataset_args = dict(S=S, B=B, C=C)
         self.dataset = VOCDataset(DATA_DIR+"8examples.csv", IMG_DIR, LABEL_DIR, **dataset_args)
 
     def test_fake_loss(self):

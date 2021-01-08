@@ -4,10 +4,10 @@
 - [x] Building the backbone architecture
 - [x] Building the loss class
 - [x] Adding data augmentation transforms
+- [ ] Building the evaluation metric class
 - [ ] Building the train script
 - [ ] Building the eval script
 - [ ] Building the detect script
-- [ ] Building the evaluation metric class
 
 <br><br> 
 
@@ -49,7 +49,7 @@
         grid
     </th>
     <th>
-        labling
+        labeled
     </th>
     <tr>
         <td><img src="assets/grid_img.png"></td>
@@ -57,9 +57,19 @@
     </tr>
     <tr>
 <br><br>
+</table>
+<br><br>
 
 ## Applying data augmentation 
 {tweaking intesity, blure, random earasing, horizontal flipping and normalization }
+<table>
+    <th>
+        labeled
+    </th>
+    <th>
+        grid
+    </th>
+    <tr>
         <td><img src="assets/labeled_img.png"></td>
         <td><img src="assets/augmented_img.png"></td>
     </tr>
