@@ -158,4 +158,8 @@ class TestModel(TestCase):
         # ])
         # hft = HorizontalFlip()
         # img, boxes = hft((src_img, boxes))
+<<<<<<< HEAD
         self.dataset.show_boxes(imgsrc, boxes[0], class_ids[0], scores[0], img_size=(448, 448))
+=======
+        self.dataset.show_boxes(imgsrc, boxes[0], img_size=(448, 448))
+>>>>>>> 214de1b5dad94c509dee8d329b2240e3a7be405e
