@@ -1,4 +1,17 @@
-# PASCAL_VOC Dataset Loading
+# To Do List
+- [x] Downloading and preparing the data
+- [x] Building the dataset class
+- [x] Building the backbone architecture
+- [x] Building the loss class
+- [x] Adding data augmentation transforms
+- [ ] Building the train script
+- [ ] Building the eval script
+- [ ] Building the detect script
+- [ ] Building the evaluation metric class
+
+<br><br> 
+
+# PASCAL_VOC {2007, 2012} Dataset Loading
 
 ## Resizing the dataset
 <table>
@@ -42,11 +55,15 @@
         <td><img src="assets/grid_img.png"></td>
         <td><img src="assets/labeled_img.png"></td>
     </tr>
+    <tr>
+        <td><img src="assets/labeled_img.png"></td>
+        <td><img src="assets/augmented_img.png"></td>
+    </tr>
 </table>
 <br><br><br>
 
 
-# YOLO Architecture
+# Darknet Architecture
 ```html
         Layer (type)               Output Shape         Param #
 ================================================================

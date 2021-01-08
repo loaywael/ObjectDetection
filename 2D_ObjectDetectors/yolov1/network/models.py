@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torchvision.models import ResNet
+from torchvision import models
 from network.utils import eval_iou
 from network.config import ARCH_CONFIG
 
@@ -50,7 +50,6 @@ class YoloDarknetv1(nn.Module):
         super(YoloDarknetv1, self).__init__()
         self._arch = ARCH_CONFIG
         self.input_size = input_size[-1::-1]
-        # print(self.input_size)
         self.S, self.B, self.C = S, B, C
         self.darknet = self._build_darknet(self._arch)
         self.fcls = self._build_fcls(S, B, C, **kwargs)
@@ -122,43 +121,14 @@ class YoloResnetv1(nn.Module):
         super(YoloResnetv1, self).__init__()
         self._arch = ARCH_CONFIG
         self.input_size = input_size[-1::-1]
-        # print(self.input_size)
         self.S, self.B, self.C = S, B, C
-        self.resnet = self._build_darknet(self._arch)
+        self.resnet = models.resnet50(pretrained=True, progress=True)
         self.fcls = self._build_fcls(S, B, C, **kwargs)
 
     def forward(self, x):
         x = self.resnet(x)
         return self.fcls(torch.flatten(x, start_dim=1))
     
-    def _build_darknet(self, layers_config):
-        """
-        Building the Darknet Backbone feature extraction network
-
-        Params
-        ------
-        layers_config : (list)
-            network layers configurations
-        """
-        layers = []
-        # padding: same
-        in_channels = self.input_size[0]
-        for layer in layers_config:
-            if type(layer) == tuple:
-                (k, c, s, p) = layer
-                layers.append(ConvBlock(in_channels, k, c, s, p))
-                in_channels = c
-            elif type(layer) == str:
-                layers.append(nn.MaxPool2d(kernel_size=(2, 2), stride=2))
-            elif type(layer) == list:
-                # i.e. repeated blocks group
-                *sub_blocks, n = layer
-                for i in range(n):
-                    for (k, c, s, p) in sub_blocks:
-                        layers.append(ConvBlock(in_channels, k, c, s, p))
-                        in_channels = c     # update next c_in = last c_out
-        return nn.Sequential(*layers)
-
     @staticmethod
     def _build_fcls(grid_size, num_boxes, num_classes):
         """
