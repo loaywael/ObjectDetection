@@ -144,7 +144,7 @@ class TestModel(TestCase):
 
     def test_transforms(self):
         dataset_args = dict(S=S, B=B, C=C, 
-            img_transformer=img_transformer, pair_transformer=pair_transformer)
+            )# img_transformer=img_transformer, pair_transformer=pair_transformer)
         self.dataset = VOCDataset(DATA_DIR+"8examples.csv", IMG_DIR, LABEL_DIR, **dataset_args)
         imgsrc, target = self.dataset.__getitem__(1)
         boxes, class_ids, scores = self.dataset.get_target_boxes(target.unsqueeze(0))
@@ -158,8 +158,4 @@ class TestModel(TestCase):
         # ])
         # hft = HorizontalFlip()
         # img, boxes = hft((src_img, boxes))
-<<<<<<< HEAD
         self.dataset.show_boxes(imgsrc, boxes[0], class_ids[0], scores[0], img_size=(448, 448))
-=======
-        self.dataset.show_boxes(imgsrc, boxes[0], img_size=(448, 448))
->>>>>>> 214de1b5dad94c509dee8d329b2240e3a7be405e

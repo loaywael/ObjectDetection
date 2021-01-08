@@ -28,7 +28,7 @@
 </table>
 <br><br>
     
-## Dividing the image into 7×7 grid
+## Dividing the image into S×S grid
 <table>
     <th>
         resized
@@ -56,6 +56,10 @@
         <td><img src="assets/labeled_img.png"></td>
     </tr>
     <tr>
+<br><br>
+
+## Applying data augmentation 
+{tweaking intesity, blure, random earasing, horizontal flipping and normalization }
         <td><img src="assets/labeled_img.png"></td>
         <td><img src="assets/augmented_img.png"></td>
     </tr>
