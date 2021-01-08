@@ -22,11 +22,13 @@ class HorizontalFlip(object):
 
 
 img_transformer = transforms.Compose([
+    transforms.Resize(224),
     transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.25),
     transforms.RandomErasing(),
     transforms.GaussianBlur(3, sigma=(0.1, 2.0)),
-    transforms.ToTensor()
+    transforms.ToTensor(), 
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
 
-pair_transformer = HorizontalFlip(0.3)
+pair_transformer = HorizontalFlip(0.5)

@@ -2,7 +2,7 @@ from torch.utils.data import DataLoader
 from network.dataset import VOCDataset
 from network.transforms import pair_transformer
 from network.transforms import img_transformer
-from network.model import YoloDarknetv1
+from network.models import YoloDarknetv1
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 from unittest import TestCase
@@ -145,12 +145,10 @@ class TestModel(TestCase):
     def test_transforms(self):
         dataset_args = dict(S=S, B=B, C=C, 
             img_transformer=img_transformer, pair_transformer=pair_transformer)
-        self.dataset = VOCDataset(DATA_DIR+"100examples.csv", IMG_DIR, LABEL_DIR, **dataset_args)
+        self.dataset = VOCDataset(DATA_DIR+"8examples.csv", IMG_DIR, LABEL_DIR, **dataset_args)
         imgsrc, target = self.dataset.__getitem__(1)
-        print("img shape: ", imgsrc.size, "target size: ", target.shape)
         boxes, class_ids, scores = self.dataset.get_target_boxes(target.unsqueeze(0))
-        print("boxes : ", boxes)
-        print("boxes shape: ", len(boxes))
+        # print(boxes)
         # src_img = PIL.Image.open(IMG_DIR+"000032.jpg")
         # boxes = torch.tensor([
         #     [0.479, 0.464, 0.542, 0.373],
@@ -160,4 +158,4 @@ class TestModel(TestCase):
         # ])
         # hft = HorizontalFlip()
         # img, boxes = hft((src_img, boxes))
-        self.dataset.show_boxes(imgsrc, boxes)
+        self.dataset.show_boxes(imgsrc, boxes[0], class_ids[0], scores[0], img_size=(448, 448))

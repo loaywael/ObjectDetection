@@ -338,7 +338,7 @@ class VOCDataset(torch.utils.data.Dataset):
                 edgecolor="yellow", alpha=0.3,
                 linewidth=2, facecolor="none", linestyle="-"
             )
-            if class_ids and scores:
+            if class_ids is not None and scores is not None:
                 txt = ax.text(
                     (cx-bw//2), cy-(bh//2),  f"id: {int(class_ids[i]):0.2f} | pc: {float(scores[i])}", size=10, 
                     ha="left", va="top", alpha=1, color="black",
