@@ -298,22 +298,26 @@ Estimated Total Size (MB): 1491.00
      BatchNorm2d-170         [-1, 2048, 14, 14]           4,096
             ReLU-171         [-1, 2048, 14, 14]               0
       Bottleneck-172         [-1, 2048, 14, 14]               0
-          Conv2d-173         [-1, 1024, 12, 12]      18,874,368
-     BatchNorm2d-174         [-1, 1024, 12, 12]           2,048
-         Dropout-175         [-1, 1024, 12, 12]               0
-       LeakyReLU-176         [-1, 1024, 12, 12]               0
-AdaptiveAvgPool2d-177           [-1, 1024, 9, 9]               0
-          Conv2d-178             [-1, 30, 9, 9]          30,720
-         Dropout-179             [-1, 30, 9, 9]               0
-         Flatten-180                 [-1, 2430]               0
+          Conv2d-173         [-1, 1024, 14, 14]       2,097,152
+     BatchNorm2d-174         [-1, 1024, 14, 14]           2,048
+         Dropout-175         [-1, 1024, 14, 14]               0
+       LeakyReLU-176         [-1, 1024, 14, 14]               0
+          Conv2d-177          [-1, 256, 14, 14]         262,144
+     BatchNorm2d-178          [-1, 256, 14, 14]             512
+         Dropout-179          [-1, 256, 14, 14]               0
+       LeakyReLU-180          [-1, 256, 14, 14]               0
+AdaptiveAvgPool2d-181            [-1, 256, 9, 9]               0
+          Conv2d-182             [-1, 30, 9, 9]           7,680
+         Dropout-183             [-1, 30, 9, 9]               0
+         Flatten-184                 [-1, 2430]               0
 ================================================================
-Total params: 42,415,168
-Trainable params: 18,907,136
+Total params: 25,877,568
+Trainable params: 2,369,536
 Non-trainable params: 23,508,032
 ----------------------------------------------------------------
 Input size (MB): 2.30
-Forward/backward pass size (MB): 1151.33
-Params size (MB): 161.80
-Estimated Total Size (MB): 1315.43
+Forward/backward pass size (MB): 1154.01
+Params size (MB): 98.72
+Estimated Total Size (MB): 1255.02
 ----------------------------------------------------------------
 ```
