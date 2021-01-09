@@ -105,7 +105,7 @@ class YoloDarknetv1(nn.Module):
             nn.Flatten(), 
             nn.Linear(S*S*1024, 4096), 
             nn.LeakyReLU(0.1),
-            nn.Linear(4096, S*S*B*(C+5)),     
+            nn.Linear(4096, S*S*(5*B+C)),     
             # to be reshaped later into (S, S, (C + B*5))
         ]
         return nn.Sequential(*output_layers)
@@ -116,12 +116,12 @@ class YoloResnetv1(nn.Module):
     YOLOv1 Original Architecture as the author paper proposed
 
     """
-    def __init__(self, input_size=(448, 448, 3), S=7, B=2, C=20, **kwargs):
+    def __init__(self, input_size=(448, 448, 3), S=7, B=2, C=20, pretrained=True, **kwargs):
         super(YoloResnetv1, self).__init__()
         self._arch = ARCH_CONFIG
         self.input_size = input_size[-1::-1]
         self.S, self.B, self.C = S, B, C
-        self.resnet = models.resnet50(pretrained=True, progress=True)
+        self.resnet = models.resnet50(pretrained=pretrained, progress=True)
         self.resnet = nn.Sequential(*list(self.resnet.children())[:-2])
         self.fcls = self._build_fcls(**kwargs)
         for param in self.resnet.parameters():
@@ -138,7 +138,7 @@ class YoloResnetv1(nn.Module):
         """
         S, B, C = self.S, self.B, self.C
         output_layers = [
-            nn.AdaptiveAvgPool2d((9, 9)), 
+            nn.AdaptiveAvgPool2d((S, S)), 
             nn.Conv2d(2048, 1024, 1, bias=False),
             nn.BatchNorm2d(1024),
             nn.Dropout(0.5),

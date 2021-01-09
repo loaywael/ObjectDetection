@@ -207,17 +207,18 @@ class VOCDataset(torch.utils.data.Dataset):
             img = self.img_transformer(img)
         if self.pair_transformer:
             img, annotations[:, 1:] = self.pair_transformer((img, annotations[:, 1:]))
+        else:
+            img = transforms.ToTensor()(img)
 
         target_matrix = torch.zeros((self.S, self.S, self.C+5*self.B))
-        # PIL image shape --> (w, h, c)
         for class_id, (*box) in annotations:
             cx, cy, w, h = box  # identify the box cell
             i, j = self._get_cell_ids((cx, cy))
-            if not target_matrix[i, j, int(self.C)]:
             # normalize dims relative to cell dims
+            normed_box = self._norm_box_dims(box, i, j)
+            if not target_matrix[i, j, int(self.C)]:
                 target_matrix[i, j, int(self.C)] = 1    # conf_score
                 target_matrix[i, j, int(class_id)] = 1    # class_id
-                normed_box = self._norm_box_dims(box, i, j)
                 target_matrix[i, j, self.C+1:self.C+5] = torch.tensor(normed_box)
         return img, target_matrix   
     

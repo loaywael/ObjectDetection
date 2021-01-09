@@ -55,7 +55,17 @@
         <td><img src="assets/grid_img.png"></td>
         <td><img src="assets/labeled_img.png"></td>
     </tr>
+    <th>
+        7×7 grid
+    </th>
+    <th>
+        13×13 grid
+    </th>
     <tr>
+        <td><img src="assets/ex_show_0.png"></td>
+        <td><img src="assets/ex_show_1.png"></td>
+    </tr>
+    <tr><td><p>smaller grid size causes missing some of the target labels</p></td><td><p>bigger sizes takes more time to train and result in bigger network</p></td></tr>
 </table>
 <br><br>
 

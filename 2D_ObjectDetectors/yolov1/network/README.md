@@ -107,16 +107,16 @@
          Flatten-101                [-1, 50176]               0
           Linear-102                 [-1, 4096]     205,524,992
        LeakyReLU-103                 [-1, 4096]               0
-          Linear-104                 [-1, 2450]      10,037,650
+          Linear-104                 [-1, 1470]      10,037,650
 ================================================================
-Total params: 275,731,794
-Trainable params: 275,731,794
+Total params: 271,716,734
+Trainable params: 271,716,734
 Non-trainable params: 0
 ----------------------------------------------------------------
 Input size (MB): 2.30
-Forward/backward pass size (MB): 436.87
-Params size (MB): 1051.83
-Estimated Total Size (MB): 1491.00
+Forward/backward pass size (MB): 436.86
+Params size (MB): 1036.52
+Estimated Total Size (MB): 1475.68
 ----------------------------------------------------------------
 ```
 <br>
