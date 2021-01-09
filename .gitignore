@@ -8,7 +8,6 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-2D_ObjectDetectors/yolov1/data/
 build/
 develop-eggs/
 dist/
@@ -128,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# DATA
+2D_ObjectDetectors/yolov1/data/
+2D_ObjectDetectors/yolov1/weights/
