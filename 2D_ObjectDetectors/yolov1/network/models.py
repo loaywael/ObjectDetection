@@ -138,6 +138,7 @@ class YoloResnetv1(nn.Module):
         """
         S, B, C = self.S, self.B, self.C
         output_layers = [
+            nn.AdaptiveAvgPool2d((9, 9)), 
             nn.Conv2d(2048, 1024, 1, bias=False),
             nn.BatchNorm2d(1024),
             nn.Dropout(0.5),
@@ -146,8 +147,8 @@ class YoloResnetv1(nn.Module):
             nn.BatchNorm2d(256),
             nn.Dropout(0.5),
             nn.LeakyReLU(0.1),
-            nn.AdaptiveAvgPool2d((9, 9)), 
             nn.Conv2d(256, (C+5*B), 1, bias=False),
+            nn.LeakyReLU(0.1),
             nn.Dropout(0.5),
             nn.Flatten()
         ]
