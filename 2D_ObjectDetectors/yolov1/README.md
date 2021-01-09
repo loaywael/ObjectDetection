@@ -56,12 +56,11 @@
         <td><img src="assets/labeled_img.png"></td>
     </tr>
     <tr>
-<br><br>
 </table>
 <br><br>
 
 ## Applying data augmentation 
-{tweaking intesity, blure, random earasing, horizontal flipping and normalization }
+> {tweaking intesity, blure, random earasing, horizontal flipping and normalization }
 <table>
     <th>
         labeled
