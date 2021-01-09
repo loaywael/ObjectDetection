@@ -95,14 +95,14 @@ Estimated Total Size (MB): 1491.00
 ## Resnet Backbone
 ```
 ================================================================
-Total params: 42,415,168
-Trainable params: 18,907,136
+Total params: 25,877,568
+Trainable params: 2,369,536
 Non-trainable params: 23,508,032
 ----------------------------------------------------------------
 Input size (MB): 2.30
-Forward/backward pass size (MB): 1151.33
-Params size (MB): 161.80
-Estimated Total Size (MB): 1315.43
+Forward/backward pass size (MB): 1154.01
+Params size (MB): 98.72
+Estimated Total Size (MB): 1255.02
 ----------------------------------------------------------------
 ```
 
